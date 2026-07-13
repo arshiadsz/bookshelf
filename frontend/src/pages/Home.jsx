@@ -6,7 +6,6 @@ import { getUser } from "../auth";
 
 export default function Home() {
   const user = getUser();
-
   const [books, setBooks] = useState([]);
   const [category, setCategory] = useState("");
   const [author, setAuthor] = useState("");
@@ -17,6 +16,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [topRated, setTopRated] = useState([]);
 
   function isFavorited(bookId) {
     for (let i = 0; i < favoriteIds.length; i++) {
@@ -41,11 +41,19 @@ export default function Home() {
     }
   }
 
+  async function loadTopRated() {
+    try {
+      const data = await api.getTopRated(5);
+      setTopRated(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   async function loadFavorites() {
     if (!user) return;
     try {
       const data = await api.getFavorites(user.id);
-      // build a plain array of just the book ids, instead of a Set
       const ids = [];
       for (let i = 0; i < data.length; i++) {
         ids.push(data[i].id);
@@ -58,6 +66,7 @@ export default function Home() {
 
   useEffect(() => {
     loadBooks();
+    loadTopRated();
     loadFavorites();
   }, [page, sort]);
 
@@ -76,8 +85,6 @@ export default function Home() {
       } else {
         await api.addFavorite(user.id, bookId);
       }
-      // re-fetch the favorites list from the server instead of manually
-      // patching favoriteIds ourselves (same pattern as BookDetail.jsx)
       loadFavorites();
     } catch (err) {
       setError(err.message);
@@ -87,6 +94,28 @@ export default function Home() {
   return (
     <div className="container">
       <h1>Browse Books</h1>
+
+      {topRated.length > 0 && (
+        <div className="top-rated-section">
+          <h2>🔥 Top Rated</h2>
+          <div className="top-rated-row">
+            {topRated.map((book, index) => (
+              <Link key={book.id} to={`/books/${book.id}`} className="top-rated-card">
+                <span className="top-rated-rank">{index + 1}</span>
+                <img
+                  src={book.cover_url || "https://placehold.co/200x280?text=No+Cover"}
+                  alt={book.title}
+                  className="top-rated-cover"
+                />
+                <div className="top-rated-info">
+                  <p className="top-rated-title">{book.title}</p>
+                  <span className="rating">⭐ {Number(book.avg_rating).toFixed(1)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <form className="filters" onSubmit={handleFilterSubmit}>
         <input

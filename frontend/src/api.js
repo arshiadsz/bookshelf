@@ -113,6 +113,15 @@ async function addReview(id, reviewData) {
   return data;
 }
 
+async function getTopRated(limit) {
+  const response = await fetch(API_URL + "/books/top-rated?limit=" + (limit || 5));
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Something went wrong");
+  }
+  return data;
+}
+
 async function likeReview(reviewId, userId) {
   const response = await fetch(API_URL + "/books/reviews/" + reviewId + "/like", {
     method: "POST",
@@ -227,6 +236,7 @@ export const api = {
   updateBook,
   deleteBook,
   addReview,
+  getTopRated,
   likeReview,
   getReadingList,
   addToReadingList,

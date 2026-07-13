@@ -96,6 +96,24 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/top-rated", async (req, res) => {
+  const limit = Number(req.query.limit) > 0 ? Number(req.query.limit) : 5;
+  try {
+    const allBooks = await sql`SELECT * FROM books`;
+    for (const book of allBooks) {
+      const ratingInfo = await getBookRatingInfo(book.id);
+      book.avg_rating = ratingInfo.avg_rating;
+      book.review_count = ratingInfo.review_count;
+    }
+    const reviewedBooks = allBooks.filter((b) => b.review_count > 0);
+    reviewedBooks.sort(compareByRatingHighToLow);
+    res.json(reviewedBooks.slice(0, limit));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.post("/reviews/:reviewId/like", async (req, res) => {
   const { reviewId } = req.params;
   const { user_id } = req.body;
