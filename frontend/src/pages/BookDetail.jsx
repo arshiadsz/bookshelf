@@ -7,6 +7,7 @@ export default function BookDetail() {
   const { id } = useParams();
   const user = getUser();
   const navigate = useNavigate();
+
   const [book, setBook] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState("");
@@ -16,7 +17,7 @@ export default function BookDetail() {
 
   async function load() {
     try {
-      const data = await api.getBook(id);
+      const data = await api.getBook(id, user?.id);
       setBook(data.book);
       setReviews(data.reviews);
     } catch (err) {
@@ -155,7 +156,6 @@ export default function BookDetail() {
           <button type="submit">Submit Review</button>
         </form>
       )}
-
       <div className="reviews-list">
         {reviews.length === 0 && <p>No reviews yet.</p>}
         {reviews.map((r) => (

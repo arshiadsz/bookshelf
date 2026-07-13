@@ -23,11 +23,9 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const { user_id, book_id, status } = req.body;
-
   if (!user_id || !book_id) {
     return res.status(400).json({ error: "user_id and book_id are required" });
   }
-
   try {
     const result = await sql`
       INSERT INTO reading_list (user_id, book_id, status)
@@ -44,7 +42,6 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { user_id, status } = req.body;
-
   try {
     const existing = await sql`SELECT user_id FROM reading_list WHERE id = ${id}`;
     if (existing.length === 0) {
@@ -53,7 +50,6 @@ router.put("/:id", async (req, res) => {
     if (existing[0].user_id !== user_id) {
       return res.status(403).json({ error: "You cannot change this entry" });
     }
-
     const result = await sql`
       UPDATE reading_list SET status = ${status} WHERE id = ${id}
       RETURNING *`;
@@ -67,7 +63,6 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   const { user_id } = req.body;
-
   try {
     const existing = await sql`SELECT user_id FROM reading_list WHERE id = ${id}`;
     if (existing.length === 0) {
@@ -76,7 +71,6 @@ router.delete("/:id", async (req, res) => {
     if (existing[0].user_id !== user_id) {
       return res.status(403).json({ error: "You cannot delete this entry" });
     }
-
     await sql`DELETE FROM reading_list WHERE id = ${id}`;
     res.json({ message: "Removed" });
   } catch (err) {

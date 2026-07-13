@@ -7,7 +7,6 @@ export default function EditBook() {
   const { id } = useParams();
   const user = getUser();
   const navigate = useNavigate();
-
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [description, setDescription] = useState("");

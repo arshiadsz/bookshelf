@@ -154,7 +154,8 @@ router.get("/:id", async (req, res) => {
     book.review_count = ratingInfo.review_count;
 
     const reviews = await sql`
-      SELECT reviews.*, users.name AS user_name
+      SELECT reviews.*, users.name AS user_name,
+        (SELECT COUNT(*) FROM review_likes WHERE review_likes.review_id = reviews.id) AS like_count
       FROM reviews
       JOIN users ON users.id = reviews.user_id
       WHERE reviews.book_id = ${id}
@@ -188,9 +189,11 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const { title, author, description, category, cover_url, owner_id } = req.body;
+
   if (!title || !author || !owner_id) {
     return res.status(400).json({ error: "title, author and owner_id are required" });
   }
+
   try {
     const result = await sql`
       INSERT INTO books (title, author, description, category, cover_url, owner_id)

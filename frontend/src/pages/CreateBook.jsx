@@ -23,12 +23,10 @@ export default function CreateBook() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-
     if (!title.trim() || !author.trim()) {
       setError("Title and author are required");
       return;
     }
-
     try {
       const book = await api.createBook({
         title,
@@ -50,10 +48,8 @@ export default function CreateBook() {
       <form className="form" onSubmit={handleSubmit}>
         <label>Title *</label>
         <input value={title} onChange={(e) => setTitle(e.target.value)} required />
-
         <label>Author *</label>
         <input value={author} onChange={(e) => setAuthor(e.target.value)} required />
-
         <label>Description</label>
         <textarea
           value={description}
@@ -73,9 +69,7 @@ export default function CreateBook() {
 
         <label>Cover image URL (optional)</label>
         <input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)} />
-
         {error && <p className="error">{error}</p>}
-
         <button type="submit">Add Book</button>
       </form>
     </div>

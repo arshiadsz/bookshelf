@@ -1,7 +1,23 @@
 import { Link } from "react-router-dom";
-export default function BookCard({ book }) {
+
+export default function BookCard({ book, isFavorited, onToggleFavorite }) {
+  function handleFavoriteClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleFavorite(book.id);
+  }
+
   return (
     <Link to={`/books/${book.id}`} className="book-card">
+      {onToggleFavorite && (
+        <button
+          className={`favorite-btn ${isFavorited ? "favorited" : ""}`}
+          onClick={handleFavoriteClick}
+          title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+        >
+          {isFavorited ? "❤️" : "🤍"}
+        </button>
+      )}
       <img
         src={book.cover_url || "https://placehold.co/200x280?text=No+Cover"}
         alt={book.title}

@@ -9,10 +9,8 @@ const userRoutes = require("./routes/users");
 const favoritesRoutes = require("./routes/favorites");
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
-
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/reading-list", readingListRoutes);

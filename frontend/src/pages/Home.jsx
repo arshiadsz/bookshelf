@@ -15,8 +15,8 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [favoriteIds, setFavoriteIds] = useState([]);
   const [topRated, setTopRated] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState([]);
 
   function isFavorited(bookId) {
     for (let i = 0; i < favoriteIds.length; i++) {
@@ -94,7 +94,6 @@ export default function Home() {
   return (
     <div className="container">
       <h1>Browse Books</h1>
-
       {topRated.length > 0 && (
         <div className="top-rated-section">
           <h2>🔥 Top Rated</h2>

@@ -19,6 +19,7 @@ export default function Dashboard() {
     api.getUserBooks(user.id).then(setMyBooks).catch((err) => setError(err.message));
     api.getReadingList(user.id).then(setReadingList).catch((err) => setError(err.message));
     api.getFavorites(user.id).then(setFavorites).catch((err) => setError(err.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleRemove(listId) {
@@ -56,7 +57,6 @@ export default function Dashboard() {
     <div className="container">
       <h1>{user.name}'s Dashboard</h1>
       {error && <p className="error">{error}</p>}
-
       <h2>Books I Added</h2>
       {myBooks.length === 0 && <p>You haven't added any books yet.</p>}
       <div className="book-grid">
@@ -74,7 +74,6 @@ export default function Dashboard() {
           </Link>
         ))}
       </div>
-
       <h2>❤️ My Favorites</h2>
       {favorites.length === 0 && <p>You haven't favorited any books yet.</p>}
       <div className="book-grid">

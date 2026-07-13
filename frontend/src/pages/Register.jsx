@@ -27,7 +27,6 @@ export default function Register() {
       <form className="form" onSubmit={handleSubmit}>
         <label>Name</label>
         <input value={name} onChange={(e) => setName(e.target.value)} required />
-
         <label>Email</label>
         <input
           type="email"
@@ -35,7 +34,6 @@ export default function Register() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-
         <label>Password</label>
         <input
           type="password"

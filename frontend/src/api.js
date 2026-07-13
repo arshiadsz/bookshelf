@@ -9,7 +9,6 @@ async function register(userData) {
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -51,8 +50,12 @@ async function getBooks(filters) {
   return data;
 }
 
-async function getBook(id) {
-  const response = await fetch(API_URL + "/books/" + id);
+async function getBook(id, userId) {
+  let url = API_URL + "/books/" + id;
+  if (userId) {
+    url = url + "?user_id=" + userId;
+  }
+  const response = await fetch(url);
   const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
@@ -106,7 +109,6 @@ async function addReview(id, reviewData) {
     body: JSON.stringify(reviewData),
   });
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
