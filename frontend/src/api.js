@@ -265,6 +265,3 @@ export const api = {
   addFavorite,
   removeFavorite,
 };
-
-git add backend/ecosystem.config.js
-git add frontend/src/pages/BookDetail.jsx frontend/src/pages/Dashboard.jsx frontend/src/pages/Home.jsx frontend/src/api.js backend/src/routes/favorites.js backend/src/index.js backend/src/routes/books.js
