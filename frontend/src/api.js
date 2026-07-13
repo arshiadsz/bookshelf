@@ -204,6 +204,49 @@ async function getUserBooks(id) {
   return data;
 }
 
+async function getFavorites(userId) {
+  const response = await fetch(API_URL + "/favorites?user_id=" + userId);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Something went wrong");
+  }
+
+  return data;
+}
+
+async function addFavorite(userId, bookId) {
+  const response = await fetch(API_URL + "/favorites", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId, book_id: bookId }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Something went wrong");
+  }
+
+  return data;
+}
+
+async function removeFavorite(bookId, userId) {
+  const response = await fetch(API_URL + "/favorites/" + bookId, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Something went wrong");
+  }
+
+  return data;
+}
+
 export const api = {
   register,
   login,
@@ -218,4 +261,10 @@ export const api = {
   updateReadingListStatus,
   removeFromReadingList,
   getUserBooks,
+  getFavorites,
+  addFavorite,
+  removeFavorite,
 };
+
+git add backend/ecosystem.config.js
+git add frontend/src/pages/BookDetail.jsx frontend/src/pages/Dashboard.jsx frontend/src/pages/Home.jsx frontend/src/api.js backend/src/routes/favorites.js backend/src/index.js backend/src/routes/books.js

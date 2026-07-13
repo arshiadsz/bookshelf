@@ -8,6 +8,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [myBooks, setMyBooks] = useState([]);
   const [readingList, setReadingList] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export default function Dashboard() {
     }
     api.getUserBooks(user.id).then(setMyBooks).catch((err) => setError(err.message));
     api.getReadingList(user.id).then(setReadingList).catch((err) => setError(err.message));
+    api.getFavorites(user.id).then(setFavorites).catch((err) => setError(err.message));
   }, []);
 
   async function handleRemove(listId) {
@@ -34,6 +36,15 @@ export default function Dashboard() {
       await api.updateReadingListStatus(listId, user.id, newStatus);
       const freshList = await api.getReadingList(user.id);
       setReadingList(freshList);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleRemoveFavorite(bookId) {
+    try {
+      await api.removeFavorite(bookId, user.id);
+      setFavorites((list) => list.filter((b) => b.id !== bookId));
     } catch (err) {
       setError(err.message);
     }
@@ -61,6 +72,29 @@ export default function Dashboard() {
               <p className="book-author">{book.author}</p>
             </div>
           </Link>
+        ))}
+      </div>
+
+      <h2>❤️ My Favorites</h2>
+      {favorites.length === 0 && <p>You haven't favorited any books yet.</p>}
+      <div className="book-grid">
+        {favorites.map((book) => (
+          <div key={book.id} className="favorite-card-wrapper">
+            <Link to={`/books/${book.id}`} className="book-card">
+              <img
+                src={book.cover_url || "https://placehold.co/200x280?text=No+Cover"}
+                alt={book.title}
+                className="book-cover"
+              />
+              <div className="book-info">
+                <h3>{book.title}</h3>
+                <p className="book-author">{book.author}</p>
+              </div>
+            </Link>
+            <button className="danger" onClick={() => handleRemoveFavorite(book.id)}>
+              Remove
+            </button>
+          </div>
         ))}
       </div>
 

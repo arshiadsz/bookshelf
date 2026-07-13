@@ -106,6 +106,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
+  const { user_id } = req.query;
   try {
     const bookResult = await sql`SELECT * FROM books WHERE id = ${id}`;
 
@@ -124,6 +125,16 @@ router.get("/:id", async (req, res) => {
       JOIN users ON users.id = reviews.user_id
       WHERE reviews.book_id = ${id}
       ORDER BY reviews.created_at DESC`;
+
+          book.is_favorited = false;
+    let likedReviewIds = [];
+
+    if (user_id) {
+      const favResult = await sql`
+        SELECT id FROM favorites WHERE user_id = ${user_id} AND book_id = ${id}`;
+      book.is_favorited = favResult.length > 0;
+      
+    }
 
     res.json({ book, reviews });
   } catch (err) {

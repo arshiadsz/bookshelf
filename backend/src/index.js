@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const bookRoutes = require("./routes/books");
 const readingListRoutes = require("./routes/readingList");
 const userRoutes = require("./routes/users");
+const favoritesRoutes = require("./routes/favorites");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/reading-list", readingListRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/favorites", favoritesRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });

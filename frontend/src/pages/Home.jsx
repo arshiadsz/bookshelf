@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../api";
 import BookCard from "../components/BookCard";
+import { getUser } from "../auth";
+
 export default function Home() {
+  const user = getUser();
+
   const [books, setBooks] = useState([]);
   const [category, setCategory] = useState("");
   const [author, setAuthor] = useState("");
@@ -11,6 +16,16 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [favoriteIds, setFavoriteIds] = useState([]);
+
+  function isFavorited(bookId) {
+    for (let i = 0; i < favoriteIds.length; i++) {
+      if (favoriteIds[i] === bookId) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   async function loadBooks() {
     setLoading(true);
@@ -26,14 +41,47 @@ export default function Home() {
     }
   }
 
+  async function loadFavorites() {
+    if (!user) return;
+    try {
+      const data = await api.getFavorites(user.id);
+      // build a plain array of just the book ids, instead of a Set
+      const ids = [];
+      for (let i = 0; i < data.length; i++) {
+        ids.push(data[i].id);
+      }
+      setFavoriteIds(ids);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   useEffect(() => {
     loadBooks();
+    loadFavorites();
   }, [page, sort]);
 
   function handleFilterSubmit(e) {
     e.preventDefault();
     setPage(1);
     loadBooks();
+  }
+
+  async function handleToggleFavorite(bookId) {
+    if (!user) return;
+    const alreadyFavorited = isFavorited(bookId);
+    try {
+      if (alreadyFavorited) {
+        await api.removeFavorite(bookId, user.id);
+      } else {
+        await api.addFavorite(user.id, bookId);
+      }
+      // re-fetch the favorites list from the server instead of manually
+      // patching favoriteIds ourselves (same pattern as BookDetail.jsx)
+      loadFavorites();
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   return (
@@ -72,7 +120,12 @@ export default function Home() {
 
       <div className="book-grid">
         {books.map((book) => (
-          <BookCard key={book.id} book={book} />
+          <BookCard
+            key={book.id}
+            book={book}
+            isFavorited={isFavorited(book.id)}
+            onToggleFavorite={user ? handleToggleFavorite : undefined}
+          />
         ))}
       </div>
       {books.length === 0 && !loading && <p>No books found.</p>}

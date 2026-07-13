@@ -29,6 +29,20 @@ export default function BookDetail() {
     load();
   }, [id]);
 
+  async function handleToggleFavorite() {
+    if (!user) return navigate("/login");
+    try {
+      if (book.is_favorited) {
+        await api.removeFavorite(id, user.id);
+      } else {
+        await api.addFavorite(user.id, id);
+      }
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function handleAddToList(newStatus) {
     if (!user) return navigate("/login");
     try {
@@ -97,6 +111,12 @@ export default function BookDetail() {
               <button onClick={() => handleAddToList("want")}>Want to Read</button>
               <button onClick={() => handleAddToList("reading")}>Currently Reading</button>
               <button onClick={() => handleAddToList("done")}>Finished</button>
+              <button
+                className={book.is_favorited ? "favorited" : ""}
+                onClick={handleToggleFavorite}
+              >
+                {book.is_favorited ? "❤️ Favorited" : "🤍 Favorite"}
+              </button>
             </div>
           )}
           {message && <p className="success">{message}</p>}
