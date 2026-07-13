@@ -5,9 +5,7 @@ async function register(userData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
@@ -21,17 +19,12 @@ async function login(userData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
-
-// ---------------- Books ----------------
 
 async function getBooks(filters) {
   let url = API_URL + "/books?";
@@ -55,18 +48,15 @@ async function getBooks(filters) {
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
 async function getBook(id) {
   const response = await fetch(API_URL + "/books/" + id);
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -76,13 +66,10 @@ async function createBook(bookData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(bookData),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -92,13 +79,10 @@ async function updateBook(id, bookData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(bookData),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -108,13 +92,10 @@ async function deleteBook(id, userId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId }),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -124,24 +105,33 @@ async function addReview(id, reviewData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(reviewData),
   });
-
   const data = await response.json();
 
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
+  return data;
+}
 
+async function likeReview(reviewId, userId) {
+  const response = await fetch(API_URL + "/books/reviews/" + reviewId + "/like", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId }),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || "Something went wrong");
+  }
   return data;
 }
 
 async function getReadingList(userId) {
   const response = await fetch(API_URL + "/reading-list?user_id=" + userId);
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -151,13 +141,10 @@ async function addToReadingList(listData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(listData),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -167,13 +154,10 @@ async function updateReadingListStatus(id, userId, status) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId, status: status }),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -183,35 +167,28 @@ async function removeFromReadingList(id, userId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId }),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
 async function getUserBooks(id) {
   const response = await fetch(API_URL + "/users/" + id + "/books");
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
 async function getFavorites(userId) {
   const response = await fetch(API_URL + "/favorites?user_id=" + userId);
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -221,13 +198,10 @@ async function addFavorite(userId, bookId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId, book_id: bookId }),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -237,13 +211,10 @@ async function removeFavorite(bookId, userId) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId }),
   });
-
   const data = await response.json();
-
   if (!response.ok) {
     throw new Error(data.error || "Something went wrong");
   }
-
   return data;
 }
 
@@ -256,6 +227,7 @@ export const api = {
   updateBook,
   deleteBook,
   addReview,
+  likeReview,
   getReadingList,
   addToReadingList,
   updateReadingListStatus,

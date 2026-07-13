@@ -31,7 +31,6 @@ router.get("/", async (req, res) => {
   const { category, author, keyword, sort, page } = req.query;
   const booksPerPage = 10;
   const currentPage = Number(page) > 0 ? Number(page) : 1;
-
   try {
     const allBooks = await sql`SELECT * FROM books`;
     for (const book of allBooks) {
@@ -42,15 +41,12 @@ router.get("/", async (req, res) => {
     const filteredBooks = [];
     for (const book of allBooks) {
       let matches = true;
-
       if (category && book.category !== category) {
         matches = false;
       }
-
       if (author && !book.author.toLowerCase().includes(author.toLowerCase())) {
         matches = false;
       }
-
       if (keyword) {
         const titleHasKeyword = book.title.toLowerCase().includes(keyword.toLowerCase());
         const descriptionHasKeyword =
@@ -59,7 +55,6 @@ router.get("/", async (req, res) => {
           matches = false;
         }
       }
-
       if (matches) {
         filteredBooks.push(book);
       }
@@ -71,7 +66,6 @@ router.get("/", async (req, res) => {
     } else {
       filteredBooks.sort(compareByNewestFirst);
     }
-
     let totalPages = 0;
     let remainingBooks = filteredBooks.length;
     while (remainingBooks > 0) {
@@ -81,7 +75,6 @@ router.get("/", async (req, res) => {
     if (totalPages === 0) {
       totalPages = 1;
     }
-
     const startIndex = (currentPage - 1) * booksPerPage;
     const endIndex = startIndex + booksPerPage;
 
@@ -91,7 +84,6 @@ router.get("/", async (req, res) => {
         booksForThisPage.push(filteredBooks[i]);
       }
     }
-
     res.json({
       books: booksForThisPage,
       page: currentPage,
@@ -104,16 +96,40 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/reviews/:reviewId/like", async (req, res) => {
+  const { reviewId } = req.params;
+  const { user_id } = req.body;
+  if (!user_id) {
+    return res.status(400).json({ error: "user_id is required" });
+  }
+  try {
+    const existing = await sql`
+      SELECT id FROM review_likes WHERE review_id = ${reviewId} AND user_id = ${user_id}`;
+    let liked;
+    if (existing.length > 0) {
+      await sql`DELETE FROM review_likes WHERE id = ${existing[0].id}`;
+      liked = false;
+    } else {
+      await sql`INSERT INTO review_likes (review_id, user_id) VALUES (${reviewId}, ${user_id})`;
+      liked = true;
+    }
+    const countResult = await sql`
+      SELECT COUNT(*) AS count FROM review_likes WHERE review_id = ${reviewId}`;
+    res.json({ liked, like_count: Number(countResult[0].count) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   const { user_id } = req.query;
   try {
     const bookResult = await sql`SELECT * FROM books WHERE id = ${id}`;
-
     if (bookResult.length === 0) {
       return res.status(404).json({ error: "Book not found" });
     }
-
     const book = bookResult[0];
     const ratingInfo = await getBookRatingInfo(id);
     book.avg_rating = ratingInfo.avg_rating;
@@ -126,16 +142,25 @@ router.get("/:id", async (req, res) => {
       WHERE reviews.book_id = ${id}
       ORDER BY reviews.created_at DESC`;
 
-          book.is_favorited = false;
+    book.is_favorited = false;
     let likedReviewIds = [];
 
     if (user_id) {
       const favResult = await sql`
         SELECT id FROM favorites WHERE user_id = ${user_id} AND book_id = ${id}`;
       book.is_favorited = favResult.length > 0;
-      
-    }
 
+      const likedResult = await sql`
+        SELECT review_likes.review_id
+        FROM review_likes
+        JOIN reviews ON reviews.id = review_likes.review_id
+        WHERE review_likes.user_id = ${user_id} AND reviews.book_id = ${id}`;
+      likedReviewIds = likedResult.map((r) => r.review_id);
+    }
+    for (const review of reviews) {
+      review.like_count = Number(review.like_count);
+      review.liked_by_me = likedReviewIds.includes(review.id);
+    }
     res.json({ book, reviews });
   } catch (err) {
     console.error(err);
@@ -145,11 +170,9 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const { title, author, description, category, cover_url, owner_id } = req.body;
-
   if (!title || !author || !owner_id) {
     return res.status(400).json({ error: "title, author and owner_id are required" });
   }
-
   try {
     const result = await sql`
       INSERT INTO books (title, author, description, category, cover_url, owner_id)
@@ -165,7 +188,6 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { title, author, description, category, cover_url, user_id } = req.body;
-
   try {
     const existing = await sql`SELECT owner_id FROM books WHERE id = ${id}`;
     if (existing.length === 0) {
@@ -174,7 +196,6 @@ router.put("/:id", async (req, res) => {
     if (existing[0].owner_id !== user_id) {
       return res.status(403).json({ error: "Only the owner can edit this book" });
     }
-
     const result = await sql`
       UPDATE books
       SET title = ${title}, author = ${author}, description = ${description},
@@ -191,7 +212,6 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   const { user_id } = req.body;
-
   try {
     const existing = await sql`SELECT owner_id FROM books WHERE id = ${id}`;
     if (existing.length === 0) {
@@ -200,7 +220,6 @@ router.delete("/:id", async (req, res) => {
     if (existing[0].owner_id !== user_id) {
       return res.status(403).json({ error: "Only the owner can delete this book" });
     }
-
     await sql`DELETE FROM books WHERE id = ${id}`;
     res.json({ message: "Book deleted" });
   } catch (err) {
@@ -212,14 +231,12 @@ router.delete("/:id", async (req, res) => {
 router.post("/:id/reviews", async (req, res) => {
   const { id } = req.params;
   const { user_id, rating, comment } = req.body;
-
   if (!user_id || !rating) {
     return res.status(400).json({ error: "user_id and rating are required" });
   }
   if (rating < 1 || rating > 5) {
     return res.status(400).json({ error: "rating must be between 1 and 5" });
   }
-
   try {
     const result = await sql`
       INSERT INTO reviews (book_id, user_id, rating, comment)

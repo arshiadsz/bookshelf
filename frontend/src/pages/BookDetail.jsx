@@ -7,7 +7,6 @@ export default function BookDetail() {
   const { id } = useParams();
   const user = getUser();
   const navigate = useNavigate();
-
   const [book, setBook] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState("");
@@ -37,6 +36,16 @@ export default function BookDetail() {
       } else {
         await api.addFavorite(user.id, id);
       }
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleLikeReview(reviewId) {
+    if (!user) return navigate("/login");
+    try {
+      await api.likeReview(reviewId, user.id);
       load();
     } catch (err) {
       setError(err.message);
@@ -153,6 +162,12 @@ export default function BookDetail() {
           <div key={r.id} className="review-item">
             <strong>{r.user_name}</strong> — ⭐ {r.rating}
             <p>{r.comment}</p>
+            <button
+              className={`like-btn ${r.liked_by_me ? "liked" : ""}`}
+              onClick={() => handleLikeReview(r.id)}
+            >
+              👍 {r.like_count > 0 ? r.like_count : ""}
+            </button>
           </div>
         ))}
       </div>
