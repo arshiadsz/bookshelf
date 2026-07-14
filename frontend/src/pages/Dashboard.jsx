@@ -19,7 +19,6 @@ export default function Dashboard() {
     api.getUserBooks(user.id).then(setMyBooks).catch((err) => setError(err.message));
     api.getReadingList(user.id).then(setReadingList).catch((err) => setError(err.message));
     api.getFavorites(user.id).then(setFavorites).catch((err) => setError(err.message));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleRemove(listId) {
