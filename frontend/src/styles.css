@@ -22,7 +22,6 @@
   --shadow: rgba(106, 76, 147, 0.1);
 }
 
-/* ------- color variables: dark theme ------- */
 [data-theme="dark"] {
   --bg-gradient: linear-gradient(135deg, #1c1524 0%, #241a30 100%);
   --text: #ece6f5;
